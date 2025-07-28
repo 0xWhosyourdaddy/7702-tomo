@@ -1,8 +1,11 @@
 # Compiler files
 cache/
 out/
+zkout/
 artifacts/
 cache_hardhat/
+artifacts-tron/
+cache_hardhat-tron/
 typechain-types
 
 # Ignores development broadcast logs

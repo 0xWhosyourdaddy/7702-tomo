@@ -1,0 +1,85 @@
+[
+    { "inputs": [], "name": "InvalidOwner", "type": "error" },
+    { "inputs": [], "name": "InvalidSessionId", "type": "error" },
+    {
+        "inputs": [{ "internalType": "address", "name": "validator", "type": "address" }],
+        "name": "InvalidValidator",
+        "type": "error"
+    },
+    {
+        "anonymous": false,
+        "inputs": [{ "indexed": false, "internalType": "uint256", "name": "utilisedNonce", "type": "uint256" }],
+        "name": "NonceConsumed",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [{ "indexed": false, "internalType": "uint256", "name": "id", "type": "uint256" }],
+        "name": "SessionRevoked",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": false, "internalType": "address", "name": "validator", "type": "address" },
+            { "indexed": false, "internalType": "bool", "name": "status", "type": "bool" }
+        ],
+        "name": "ValidatorStatusUpdated",
+        "type": "event"
+    },
+    {
+        "inputs": [],
+        "name": "getNonce",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getOwner",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "address", "name": "validator", "type": "address" }],
+        "name": "readAndUpdateNonce",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "uint256", "name": "id", "type": "uint256" }],
+        "name": "revokeSession",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "address", "name": "validator", "type": "address" },
+            { "internalType": "bool", "name": "isValid", "type": "bool" }
+        ],
+        "name": "setValidatorStatus",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "uint256", "name": "id", "type": "uint256" },
+            { "internalType": "address", "name": "validator", "type": "address" }
+        ],
+        "name": "validateSession",
+        "outputs": [],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "address", "name": "validator", "type": "address" }],
+        "name": "validateValidator",
+        "outputs": [],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]
