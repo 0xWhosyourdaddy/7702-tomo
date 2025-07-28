@@ -127,12 +127,12 @@ async function main() {
     await sleep(3000);
 
     // 这个转账最终的calldata, 需要 sponsor签名后，广播的第二个交易
-    const sentTx = await walletCore.executeWithValidator(calls, validator, signature, {
+    const transferTx = await walletCore.executeWithValidator(calls, validator, signature, {
         gasLimit: 300000,
         maxFeePerGas: maxFeePerGas,
         maxPriorityFeePerGas: maxPriorityFeePerGas,
     });
-    console.log("transfer tx sent:", sentTx.hash);
+    console.log("transfer tx sent:", transferTx.hash);
 }
 
 main()
