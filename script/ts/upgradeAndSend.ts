@@ -10,6 +10,7 @@ import {
     sleep,
     calculateStorageAddress,
     tokenTransferWithFeeCalls,
+    getWalletCoreSignature,
 } from "./utils";
 import yargs from "yargs/yargs";
 import dotenv from "dotenv";
@@ -113,13 +114,22 @@ async function main() {
 
     console.log("Calls: ", calls);
 
-    const hash = await walletCore.getValidationTypedHash(userWalletCoreNonce, calls);
-    console.log("Hash: ", hash);
+    // const hash = await walletCore.getValidationTypedHash(userWalletCoreNonce, calls);
+    // console.log("Hash: ", hash);
 
-    // 这个是需要用户签的第二个data （eip712签名）
-    const sig = await userWallet.signingKey.sign(hash);
-    const signature = ethers.concat([sig.r, sig.s, ethers.toBeHex(sig.v, 1)]);
+    // // 这个是需要用户签的第二个data
+    // const sig = await userWallet.signingKey.sign(hash);
+    // const signature = ethers.concat([sig.r, sig.s, ethers.toBeHex(sig.v, 1)]);
 
+    // 这个是需要用户签的第二个data, 后端返回hash给前端签即可
+    const { signature } = await getWalletCoreSignature(
+        userWallet,
+        userWallet.address,
+        config.walletCoreAddress,
+        chainId,
+        userWalletCoreNonce,
+        calls
+    );
     console.log("Signature:", signature);
 
     const validator = "0x0000000000000000000000000000000000000001";

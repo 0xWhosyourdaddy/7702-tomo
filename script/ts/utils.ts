@@ -364,3 +364,64 @@ export async function getPermitSignature(
     permit.details.nonce = nextNonce;
     return await signPermit(permit, signer, chainId, permit2Address);
 }
+
+export async function getWalletCoreSignature(
+    userWallet: ethers.Wallet,
+    walletAddress: string,
+    implementation: string,
+    chainId: number,
+    walletCoreNonce: number,
+    calls: Call[]
+) {
+    // Hash each call using the CALL_TYPEHASH (same as Solidity)
+    const callHashes = calls.map((call) => {
+        const callEncoded = ethers.AbiCoder.defaultAbiCoder().encode(
+            ["bytes32", "address", "uint256", "bytes32"],
+            [
+                ethers.keccak256(ethers.toUtf8Bytes("Call(address target,uint256 value,bytes data)")),
+                call.target,
+                call.value,
+                ethers.keccak256(call.data),
+            ]
+        );
+        return ethers.keccak256(callEncoded);
+    });
+
+    // Recreate the exact same structure as Solidity's _getValidationHash
+    const CALLS_TYPEHASH = ethers.keccak256(ethers.toUtf8Bytes("Calls(address wallet,uint256 nonce,bytes32[] calls)"));
+
+    const validationHash = ethers.keccak256(
+        ethers.AbiCoder.defaultAbiCoder().encode(
+            ["bytes32", "address", "uint256", "bytes32"],
+            [
+                CALLS_TYPEHASH,
+                implementation,
+                walletCoreNonce,
+                ethers.keccak256(ethers.AbiCoder.defaultAbiCoder().encode(["bytes32[]"], [callHashes])),
+            ]
+        )
+    );
+
+    // Now apply EIP-712 domain separator manually (same as _hashTypedDataV4)
+    const domain = {
+        name: "wallet-core",
+        version: "1.0.0",
+        chainId: chainId,
+        verifyingContract: walletAddress,
+    };
+
+    // Calculate domain separator
+    const domainSeparator = ethers.TypedDataEncoder.hashDomain(domain);
+
+    // Apply EIP-712 final hash: keccak256("\x19\x01" + domainSeparator + structHash)
+    const typedDataHash = ethers.keccak256(ethers.concat(["0x1901", domainSeparator, validationHash]));
+
+    // Sign the hash directly (not using signTypedData)
+    const signature = await userWallet.signingKey.sign(typedDataHash);
+    const signatureBytes = ethers.concat([signature.r, signature.s, ethers.toBeHex(signature.v, 1)]);
+
+    return {
+        hash: typedDataHash,
+        signature: signatureBytes,
+    };
+}
