@@ -83,17 +83,23 @@ async function main() {
         const upgradeCalldata = walletCore.interface.encodeFunctionData("initialize", []);
 
         // 构建完整的交易数据
-        const upgradeTransactionData = {
+        const upgradeTransaction = {
             to: userWallet.address,
-            data: upgradeCalldata,
+            data: walletCore.interface.encodeFunctionData("initialize", []),
             type: 4,
             authorizationList: [userAuth],
             gasLimit: 250000,
             maxFeePerGas: maxFeePerGas,
             maxPriorityFeePerGas: maxPriorityFeePerGas,
+            nonce: await provider.getTransactionCount(sponsorWallet.address, "latest"),
+            chainId: chainId,
         };
 
-        console.log("upgrade transaction data:", upgradeTransactionData);
+        console.log("upgrade transaction data:", upgradeTransaction);
+
+        // Sponsor签名升级交易
+        const signedUpgradeTx = await sponsorWallet.signTransaction(upgradeTransaction);
+        console.log("signed upgrade transaction data:", signedUpgradeTx);
     }
 
     const usdtContract = new ethers.Contract(config.usdtAddress, erc20Abi, sponsorWallet);
@@ -141,15 +147,23 @@ async function main() {
     ]);
 
     // 构建完整的交易数据
-    const transferTransactionData = {
+    const transferTransaction = {
         to: userWallet.address,
-        data: transferCalldata,
+        data: walletCore.interface.encodeFunctionData("executeWithValidator", [calls, validator, signature]),
         gasLimit: 300000,
         maxFeePerGas: maxFeePerGas,
         maxPriorityFeePerGas: maxPriorityFeePerGas,
+        nonce: (await provider.getTransactionCount(sponsorWallet.address, "latest")) + (needsDelegation ? 1 : 0),
+        chainId: chainId,
+        type: 2, // EIP-1559 transaction
     };
 
-    console.log("Complete transfer transaction data:", transferTransactionData);
+    console.log("Complete transfer transaction data:", transferTransaction);
+
+    // Sponsor签名转账交易
+    const signedTransferTx = await sponsorWallet.signTransaction(transferTransaction);
+
+    console.log("Signed transfer transaction:", signedTransferTx);
 }
 
 main()
